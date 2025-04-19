@@ -2,7 +2,7 @@
 
 namespace Blogs.Models
 {
-    public class Author : IContent, IEntity
+    public class Author : IEntity
     {
         public SystemProperties Sys { get; set; }
 

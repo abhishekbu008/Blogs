@@ -1,3 +1,4 @@
+using Blogs;
 using Blogs.Services;
 using Contentful.AspNetCore;
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddContentful(builder.Configuration);
 builder.Services.AddScoped<IContentfulService, ContentfulService>();
+builder.Services.Configure<ContentfulOptions>(builder.Configuration.GetSection(key: nameof(ContentfulOptions)));
 
 var app = builder.Build();
 

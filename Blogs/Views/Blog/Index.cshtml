@@ -1,12 +1,15 @@
 ﻿@using Blogs.Models
 @using Blogs.Services
 @using Blogs.Extensions
+@using Contentful.Core.Models
 
 @model List<BlogPost>
 
 @{
     ViewBag.Title = "Blogs";
 }
+
+<a class="btn btn-primary mb-5" href="@Url.Action("Create", "Blog")">Create a new Blog</a>
 
 <h1 class="mb-4">Latest Blog Posts</h1>
 
@@ -30,14 +33,8 @@
                  class="img-fluid mb-3" />
         }
 
-        <p>
-            @{
-                var plainText = blog.Content.ToPlainText();
-                var preview = plainText.Length > 200 ? plainText.Substring(0, 200) + "..." : plainText;
-            }
-            @preview
-        </p>
+        <contentful-rich-text document="@blog.Content"></contentful-rich-text>
 
-        <a class="btn btn-primary" href="@Url.Action("Details", "Blog", new { slug = blog.Slug })">Read More</a>
+        <a class="btn btn-primary" href="@Url.Action("Details", "Home", new { slug = blog.Slug })">Read More</a>
     </div>
 }

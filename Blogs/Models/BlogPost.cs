@@ -2,7 +2,7 @@
 
 namespace Blogs.Models
 {
-    public class BlogPost : IContent, IEntity
+    public class BlogPost : IEntity
     {
         public SystemProperties Sys { get; set; }
         public string Title { get; set; }
