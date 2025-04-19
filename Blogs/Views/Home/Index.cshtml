@@ -1,0 +1,43 @@
+﻿@using Blogs.Models
+@using Blogs.Services
+@using Blogs.Extensions
+
+@model List<BlogPost>
+
+@{
+    ViewBag.Title = "Blogs";
+}
+
+<h1 class="mb-4">Latest Blog Posts</h1>
+
+@foreach (var blog in Model)
+{
+    <div class="blog-post-preview mb-5 border-bottom pb-3">
+        <h2>
+            <a href="@Url.Action("Details", "Blog", new { slug = blog.Slug })">
+                @blog.Title
+            </a>
+        </h2>
+
+        <div class="text-muted mb-2">
+            by @blog.Author?.Name on @blog.PublishedDate.ToString("MMMM dd, yyyy")
+        </div>
+
+        @if (blog.FeaturedImage?.File?.Url != null)
+        {
+            <img src="https:@blog.FeaturedImage.File.Url?w=600&h=300&fit=thumb"
+                 alt="@blog.FeaturedImage.Title"
+                 class="img-fluid mb-3" />
+        }
+
+        <p>
+            @{
+                var plainText = blog.Content.ToPlainText();
+                var preview = plainText.Length > 200 ? plainText.Substring(0, 200) + "..." : plainText;
+            }
+            @preview
+        </p>
+
+        <a class="btn btn-primary" href="@Url.Action("Details", "Blog", new { slug = blog.Slug })">Read More</a>
+    </div>
+}
