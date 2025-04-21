@@ -87,6 +87,7 @@ To integrate Contentful into your .NET application, you need to configure your A
   "UsePreviewApi": false,
   "MaxNumberOfRateLimitRetries": 0
 }
+```
 
 Explanation of Configuration Options:
 
