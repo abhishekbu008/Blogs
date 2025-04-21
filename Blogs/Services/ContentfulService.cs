@@ -1,8 +1,11 @@
 ﻿using Blogs.Models;
 using Contentful.Core;
+using Contentful.Core.Errors;
 using Contentful.Core.Models;
 using Contentful.Core.Models.Management;
 using Contentful.Core.Search;
+using Microsoft.Extensions.Hosting;
+using System.Net;
 
 namespace Blogs.Services
 {
@@ -45,23 +48,55 @@ namespace Blogs.Services
         {
             var space = await _contentfulManagementClient.GetSpace(spaceId);
             var version = space.SystemProperties.Version;
-            await _contentfulManagementClient.UpdateSpaceName(spaceId, newSpaceName, version.Value);
+            await _contentfulManagementClient.UpdateSpaceName(spaceId, newSpaceName, version ?? 1);
         }
 
         public async Task CreateOrUpdateContentType(string id, string name, string desc, List<Field> fields, string displayField)
         {
-            var contentType = new ContentType();
-            contentType.SystemProperties = new SystemProperties();
-            contentType.SystemProperties.Id = id;
-            contentType.Name = name;
-            contentType.Description = desc;
-            contentType.Fields = fields;
-            contentType.DisplayField = displayField;
+            var contentType = new ContentType
+            {
+                SystemProperties = new SystemProperties { Id = id },
+                Name = name,
+                Description = desc,
+                Fields = fields,
+                DisplayField = displayField
+            };
 
-            var existingContentType = await _contentfulManagementClient.GetContentType(id);
-            var version = existingContentType?.SystemProperties?.Version ?? 1;
-            var updatedContentType = await _contentfulManagementClient.CreateOrUpdateContentType(contentType, version: version);
-            await _contentfulManagementClient.ActivateContentType(updatedContentType.SystemProperties.Id, updatedContentType.SystemProperties.Version.Value);
+            try
+            {
+                ContentType existingContentType = null;
+
+                try
+                {
+                    // Attempt to fetch the existing content type
+                    existingContentType = await _contentfulManagementClient.GetContentType(id);
+                }
+                catch (ContentfulException ex) when (ex.StatusCode == (int)HttpStatusCode.NotFound)
+                {
+                    // Handle the "resource not found" error
+                    Console.WriteLine($"Content type with ID '{id}' not found. Proceeding to create a new content type.");
+                }
+
+                var version = existingContentType?.SystemProperties?.Version ?? 1;
+
+                // Create or update the content type
+                var updatedContentType = await _contentfulManagementClient.CreateOrUpdateContentType(contentType, version: version);
+
+                // Activate the content type
+                if (updatedContentType != null && updatedContentType.SystemProperties.Version.HasValue)
+                {
+                    await _contentfulManagementClient.ActivateContentType(updatedContentType.SystemProperties.Id, updatedContentType.SystemProperties.Version.Value);
+                }
+                else
+                {
+                    throw new Exception("Failed to create or update the content type.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log or handle the exception as needed
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
         }
 
         public async Task<List<ManagementAsset>> GetAllAssetsAsync()
@@ -102,9 +137,35 @@ namespace Blogs.Services
 
             var created = await _contentfulManagementClient.CreateEntry(entry, contentTypeId: "blogPost");
 
-            await _contentfulManagementClient.PublishEntry(created.SystemProperties.Id, created.SystemProperties.Version.Value);
-            return created?.SystemProperties?.Id;
+            await _contentfulManagementClient.PublishEntry(created.SystemProperties.Id, created.SystemProperties.Version ?? 1);
+            return created.SystemProperties.Id;
         }
 
+        public async Task<string> CreateAuthorAsync(Author author)
+        {
+            var entry = new Entry<dynamic>();
+            entry.SystemProperties = new SystemProperties
+            {
+                ContentType = new ContentType { SystemProperties = new SystemProperties { Id = "author" } }
+            };
+
+            entry.Fields = new
+            {
+                Name = new Dictionary<string, string> { { "en-US", author.Name } },
+                Bio = new Dictionary<string, string> { { "en-US", author.Bio } },
+                ProfilePicture = new Dictionary<string, Reference>
+                {
+                    {
+                        "en-US",
+                        new Reference(linkType: SystemLinkTypes.Asset, id: author.ProfilePicture?.SystemProperties?.Id)
+                    }
+                }
+            };
+
+            var created = await _contentfulManagementClient.CreateEntry(entry, contentTypeId: "author");
+
+            await _contentfulManagementClient.PublishEntry(created.SystemProperties.Id, created.SystemProperties.Version ?? 1);
+            return created.SystemProperties.Id;
+        }
     }
 }

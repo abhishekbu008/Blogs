@@ -1,0 +1,47 @@
+﻿@{
+    ViewBag.Title = "Authors";
+}
+@model IEnumerable<Author>
+
+<a class="btn btn-primary mb-5" href="@Url.Action("Create", "Author")">Create a new Author</a>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Authors</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Authors</h1>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="row">
+                @foreach (var author in Model)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                                @if (author.ProfilePicture?.File?.Url != null)
+                                {
+                                    <img src="https:@author.ProfilePicture.File.Url?w=600&h=300&fit=thumb"
+                                        alt="@author.ProfilePicture.Title"
+                                        class="img-fluid mb-3" />
+                                }                            
+                                <div class="card-body">
+                                <h5 class="card-title">@author.Name</h5>
+                                <p class="card-text">@author.Bio</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>No authors found.</p>
+        }
+    </div>
+</body>
+</html>

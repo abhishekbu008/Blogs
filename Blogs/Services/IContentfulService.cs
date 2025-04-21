@@ -18,6 +18,8 @@ namespace Blogs.Services
 
         Task<string> CreateBlogPostAsync(BlogPost post);
 
+        Task<string> CreateAuthorAsync(Author author);
+
         Task<List<ManagementAsset>> GetAllAssetsAsync();
 
         Task CreateOrUpdateContentType(string Id, string name, string desc, List<Field> fields, string displayField);
