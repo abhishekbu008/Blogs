@@ -48,7 +48,7 @@ namespace Blogs.Services
             await _contentfulManagementClient.UpdateSpaceName(spaceId, newSpaceName, version.Value);
         }
 
-        public async Task CreateContentType(string id, string name, string desc, List<Field> fields, string displayField)
+        public async Task CreateOrUpdateContentType(string id, string name, string desc, List<Field> fields, string displayField)
         {
             var contentType = new ContentType();
             contentType.SystemProperties = new SystemProperties();
@@ -57,6 +57,11 @@ namespace Blogs.Services
             contentType.Description = desc;
             contentType.Fields = fields;
             contentType.DisplayField = displayField;
+
+            var existingContentType = await _contentfulManagementClient.GetContentType(id);
+            var version = existingContentType?.SystemProperties?.Version ?? 1;
+            var updatedContentType = await _contentfulManagementClient.CreateOrUpdateContentType(contentType, version: version);
+            await _contentfulManagementClient.ActivateContentType(updatedContentType.SystemProperties.Id, updatedContentType.SystemProperties.Version.Value);
         }
 
         public async Task<List<ManagementAsset>> GetAllAssetsAsync()
@@ -100,5 +105,6 @@ namespace Blogs.Services
             await _contentfulManagementClient.PublishEntry(created.SystemProperties.Id, created.SystemProperties.Version.Value);
             return created?.SystemProperties?.Id;
         }
+
     }
 }

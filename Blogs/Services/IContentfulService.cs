@@ -1,4 +1,5 @@
 ﻿using Blogs.Models;
+using Contentful.Core.Models;
 using Contentful.Core.Models.Management;
 
 namespace Blogs.Services
@@ -18,5 +19,8 @@ namespace Blogs.Services
         Task<string> CreateBlogPostAsync(BlogPost post);
 
         Task<List<ManagementAsset>> GetAllAssetsAsync();
+
+        Task CreateOrUpdateContentType(string Id, string name, string desc, List<Field> fields, string displayField);
+
     }
 }
