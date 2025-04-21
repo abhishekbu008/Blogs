@@ -73,3 +73,26 @@ Install the Contentful SDK via NuGet:
 ```bash
 dotnet add package contentful.aspnetcore
 ```
+
+## ⚙️ Configuration
+
+To integrate Contentful into your .NET application, you need to configure your API keys and other settings. Add the following section to your `appsettings.json` file:
+
+```json
+"ContentfulOptions": {
+  "DeliveryApiKey": "<Your Delivery API Key>",
+  "ManagementApiKey": "<Your Management API Key>",
+  "PreviewApiKey": "<Your Preview API Key>",
+  "SpaceId": "<Your Space ID>",
+  "UsePreviewApi": false,
+  "MaxNumberOfRateLimitRetries": 0
+}
+
+Explanation of Configuration Options:
+
+- DeliveryApiKey: API key for accessing published content via the Content Delivery API (CDA).
+- ManagementApiKey: API key for managing content via the Content Management API (CMA).
+- PreviewApiKey: API key for accessing draft content via the Content Preview API (CPA).
+- SpaceId: The unique identifier for your Contentful space.
+- UsePreviewApi: Set to true if you want to fetch draft content using the Preview API.
+- MaxNumberOfRateLimitRetries: The number of retries the SDK should attempt when encountering rate limits.
